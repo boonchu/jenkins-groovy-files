@@ -15,7 +15,7 @@ spec:
     command:
     - sleep
     args:
-    - infinity
+    - 99999
 '''
         }
     }
