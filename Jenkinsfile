@@ -48,7 +48,7 @@ spec:
             steps {
 				hello 'Git CheckOut'
 				// default branch is master
-				gitchkout("master", "https://github.com/boonchu/java-hello-world-with-maven.git")
+				gitchkout("develop", "https://github.com/boonchu/java-hello-world-with-maven.git")
             }
         }
 
