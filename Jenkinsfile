@@ -9,8 +9,9 @@ pipeline {
         def CONFIG_FILE_UUID   = '8ac4e324-359d-4b24-9cc3-04893a7d56ce'
 
         // Sonar Settings
-        def SONAR_SERVER_URL   = 'http://172.30.30.102:9000'
-        def SONAR_SCANNER_HASH = '6d401f63ef2d3cbae6c1536064077d2178bb6d2e'
+        def SONAR_SERVER_URL     = 'http://172.30.30.102:9000'
+        def SONAR_SCANNER_HASH   = '6d401f63ef2d3cbae6c1536064077d2178bb6d2e'
+        def SONAR_PLUGIN_VERSION = '3.9.0.2155'
 
         // Nexus settings
         NEXUS_VERSION = "nexus3"
