@@ -6,6 +6,17 @@ pipeline {
 
     environment {
         def CONFIG_FILE_UUID   = '8ac4e324-359d-4b24-9cc3-04893a7d56ce'
+
+        // This can be nexus3 or nexus2
+        NEXUS_VERSION = "nexus3"
+        // This can be http or https
+        NEXUS_PROTOCOL = "http"
+        // Where your Nexus is running
+        NEXUS_URL = "172.30.30.102:8081"
+        // Repository where we will upload the artifact
+        NEXUS_REPOSITORY = "springboot"
+        // Jenkins credential id to authenticate to Nexus OSS
+        NEXUS_CREDENTIAL_ID = "nexus"
     }
 
     agent {
@@ -47,7 +58,7 @@ spec:
                 configFileProvider([configFile(fileId: "${CONFIG_FILE_UUID}", variable: 'MAVEN_GLOBAL_SETTINGS')]) {
                 	sh """
                        mvn clean test -f pom.xml -gs $MAVEN_GLOBAL_SETTINGS
-                       mvn package -f pom.xml -gs $MAVEN_GLOBAL_SETTINGS
+                       mvn package -DskipTests=true -f pom.xml -gs $MAVEN_GLOBAL_SETTINGS
                     """
                 }
 
@@ -64,7 +75,31 @@ spec:
                     artifactPath = filesByGlob[0].path;
                     artifactExists = fileExists artifactPath;
                     if(artifactExists) {                
-                         echo "*** File: ${artifactPath}, group: ${pom.groupId}, packaging: ${pom.packaging}, version ${pom.version}";
+                         echo "LOG->INFO : File: ${artifactPath}, group: ${pom.groupId}, packaging: ${pom.packaging}, version ${pom.version}";
+                         nexusArtifactUploader(
+                            nexusVersion: NEXUS_VERSION,
+                            protocol: NEXUS_PROTOCOL,
+                            nexusUrl: NEXUS_URL,
+                            groupId: pom.groupId,
+                            version: pom.version,
+                            repository: NEXUS_REPOSITORY,
+                            credentialsId: NEXUS_CREDENTIAL_ID,
+                            artifacts: [
+                                // Artifact generated such as .jar, .ear and .war files.
+                                [artifactId: pom.artifactId,
+                                classifier: '',
+                                file: artifactPath,
+                                type: pom.packaging],
+
+                                // Lets upload the pom.xml file for additional information for Transitive dependencies
+                                [artifactId: pom.artifactId,
+                                classifier: '',
+                                file: "pom.xml",
+                                type: "pom"]
+                            ]
+                         );
+                    } else {
+                        error "LOG->ERROR :  File: ${artifactPath}, could not be found";
                     }
                 }
 			}
