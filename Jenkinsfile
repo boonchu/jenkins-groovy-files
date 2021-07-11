@@ -47,6 +47,7 @@ spec:
                 configFileProvider([configFile(fileId: "${CONFIG_FILE_UUID}", variable: 'MAVEN_GLOBAL_SETTINGS')]) {
                 	sh """
                        mvn clean test -f pom.xml -gs $MAVEN_GLOBAL_SETTINGS
+                       mvn package -f pom.xml -gs $MAVEN_GLOBAL_SETTINGS
                     """
                 }
 
