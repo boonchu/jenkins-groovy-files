@@ -43,9 +43,17 @@ spec:
 				hello "Testing"
 				// default branch is master
 				gitchkout("master", "https://github.com/boonchu/java-hello-world-with-maven.git")
+                // read artifact version
+                script {
+                    def pom = readMavenPom file: 'pom.xml'
+                    ARTIFACT_VERSION = pom.version
+                    echo "LOG-->INFO-->ARTIFACT_VERSION : ${ARTIFACT_VERSION}"
+                }
+                // maven build
                 configFileProvider([configFile(fileId: "${CONFIG_FILE_UUID}", variable: 'MAVEN_GLOBAL_SETTINGS')]) {
                 	sh """
-                           mvn clean test -f pom.xml -gs $MAVEN_GLOBAL_SETTINGS && mvn deploy -f pom.xml -gs $MAVEN_GLOBAL_SETTINGS
+                       mvn clean test -f pom.xml -gs $MAVEN_GLOBAL_SETTINGS
+                       mvn deploy -f pom.xml -gs $MAVEN_GLOBAL_SETTINGS
                     """
                 }
 			}
