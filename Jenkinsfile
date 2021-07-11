@@ -5,9 +5,14 @@
 pipeline {
 
     environment {
+        // Maven settings.xml
         def CONFIG_FILE_UUID   = '8ac4e324-359d-4b24-9cc3-04893a7d56ce'
 
-        // This can be nexus3 or nexus2
+        // Sonar Settings
+        def SONAR_SERVER_URL   = 'http://172.30.30.102:9000'
+        def SONAR_SCANNER_HASH = '6d401f63ef2d3cbae6c1536064077d2178bb6d2e'
+
+        // Nexus settings
         NEXUS_VERSION = "nexus3"
         // This can be http or https
         NEXUS_PROTOCOL = "http"
@@ -37,27 +42,50 @@ spec:
         }
     }
     stages {
-        stage('Call Hello()') {
+
+        stage('Git CheckOut') {
             steps {
-                // sh 'hostname'
-				hello "World!"
+				hello 'Git CheckOut'
+				// default branch is master
+				gitchkout("master", "https://github.com/boonchu/java-hello-world-with-maven.git")
             }
         }
-        stage('Call Notify_Build()') {
+
+        stage('Sending Notification when started') {
             steps {
-                // sh 'hostname'
+				hello 'Sending Notification when started'
 				notify 'STARTED'
             }
         }
-        stage('Testing and archive jar files') {
-			steps {
-				hello "Testing"
-				// default branch is master
-				gitchkout("master", "https://github.com/boonchu/java-hello-world-with-maven.git")
-                // maven build
+
+        stage('Static Analysis and simple UnitTest') {
+            steps {
+				hello 'Static Analysis and simple UnitTest'
+                echo "LOG-->INFO-->SONAR_PLUGIN_VERSION : ${SONAR_PLUGIN_VERSION}"
+                echo "LOG-->INFO-->SONAR_SERVER_URL : ${SONAR_SERVER_URL}"
+                echo "LOG-->INFO-->SONAR_SCANNER_HASH : ${SONAR_SCANNER_HASH}"
+
+                // maven unit test
                 configFileProvider([configFile(fileId: "${CONFIG_FILE_UUID}", variable: 'MAVEN_GLOBAL_SETTINGS')]) {
                 	sh """
                        mvn clean test -f pom.xml -gs $MAVEN_GLOBAL_SETTINGS
+                       mvn clean compile org.sonarsource.scanner.maven:sonar-maven-plugin:${SONAR_PLUGIN_VERSION}:sonar -f pom.xml \
+                            -Dsonar.projectKey=maven-code-analysis \
+                            -Dsonar.host.url=${SONAR_SERVER_URL} \
+                            -Dsonar.login=${SONAR_SCANNER_HASH} \
+                            -gs ${MAVEN_GLOBAL_SETTINGS}
+                    """
+                }
+            }
+        }
+
+        stage('Archive jar files') {
+			steps {
+				hello "Archive jar files"
+
+                // maven package
+                configFileProvider([configFile(fileId: "${CONFIG_FILE_UUID}", variable: 'MAVEN_GLOBAL_SETTINGS')]) {
+                	sh """
                        mvn package -DskipTests=true -f pom.xml -gs $MAVEN_GLOBAL_SETTINGS
                     """
                 }
@@ -104,11 +132,13 @@ spec:
                 }
 			}
         }
+
         stage('Building Image') {
             steps {
                 hello "Building Image"
             } 
         }
+
         stage('Deploy Image') {
             steps {
                 hello "Deploying Image"
