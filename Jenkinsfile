@@ -10,12 +10,12 @@ apiVersion: v1
 kind: Pod
 spec:
   containers:
-  - name: shell
-    image: adoptopenjdk/maven-openjdk11
+  - name: openjdk11
+    image: maven:3.8.1-openjdk-11
     command:
     - sleep
     args:
-    - 99999
+    - infinity
 '''
         }
     }
