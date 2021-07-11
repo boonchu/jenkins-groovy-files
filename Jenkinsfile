@@ -69,13 +69,43 @@ spec:
                 // maven unit test
                 configFileProvider([configFile(fileId: "${CONFIG_FILE_UUID}", variable: 'MAVEN_GLOBAL_SETTINGS')]) {
                 	sh """
-                       mvn clean test -f pom.xml -gs $MAVEN_GLOBAL_SETTINGS
                        mvn clean compile org.sonarsource.scanner.maven:sonar-maven-plugin:${SONAR_PLUGIN_VERSION}:sonar -f pom.xml \
                             -Dsonar.projectKey=maven-code-analysis \
                             -Dsonar.host.url=${SONAR_SERVER_URL} \
                             -Dsonar.login=${SONAR_SCANNER_HASH} \
                             -gs ${MAVEN_GLOBAL_SETTINGS}
+                       mvn clean test -f pom.xml -gs $MAVEN_GLOBAL_SETTINGS
                     """
+                }
+            }
+        }
+
+        stage('Java Code Coverage - JaCoCo') {
+            steps {
+               configFileProvider([configFile(fileId: "${CONFIG_FILE_UUID}", variable: 'MAVEN_GLOBAL_SETTINGS')]) {
+                   withSonarQubeEnv(installationName: 'sonarqube-server') {
+                        sh """
+                            mvn org.jacoco:jacoco-maven-plugin:prepare-agent -f pom.xml clean test \
+                                 -Dautoconfig.skip=true -Dmaven.test.skip=false \
+                                 -Dmaven.test.failure.ignore=true sonar:sonar \
+                                 -Dsonar.host.url=${SONAR_SERVER_URL} \
+                                 -Dsonar.login=${SONAR_SCANNER_HASH} \
+                                 -gs ${MAVEN_GLOBAL_SETTINGS}
+                           """
+                    }
+               }
+            }
+        }
+
+        stage("Quality Gate"){
+            steps{
+                timeout(time: 5, unit: 'MINUTES') {
+                    script {
+                        def qg = waitForQualityGate(abortPipeline: true)
+                        if (qg.status != 'OK') {
+                           error "Pipeline aborted due to a quality gate failure: ${qg.status}"
+                        }
+                    }
                 }
             }
         }
