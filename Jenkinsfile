@@ -32,11 +32,38 @@ spec:
         }
     }
     stages {
-        stage('Main') {
+        stage('Call Hello()') {
             steps {
                 // sh 'hostname'
 				hello "World!"
             }
         }
+        stage('Call Notify_Build()') {
+            steps {
+                // sh 'hostname'
+				notify 'STARTED'
+            }
+        }
+        stage('Testing') {
+			steps {
+				hello "Testing"
+			}
+        }
+        stage('Building Image') {
+            steps {
+                hello "Building Image"
+            } 
+        }
+        stage('Deploy Image') {
+            steps {
+                hello "Deploying Image"
+            } 
+        }
     }
+    post{
+        always{
+            echo "========always========"
+            notify currentBuild.result
+        }
+	}
 }
