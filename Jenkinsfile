@@ -1,7 +1,13 @@
 @Library('jenkins-groovy-lib@feature/using-notify') _
 
+
 // Uses Declarative syntax to run commands inside a container.
 pipeline {
+
+    environment {
+        def CONFIG_FILE_UUID   = '8ac4e324-359d-4b24-9cc3-04893a7d56ce'
+    }
+
     agent {
         kubernetes {
             defaultContainer 'openjdk11'
@@ -37,9 +43,11 @@ spec:
 				hello "Testing"
 				// default branch is master
 				gitchkout("master", "https://github.com/boonchu/java-hello-world-with-maven.git")
-				sh """
-					mvn clean test && mvn package
-				"""
+                configFileProvider([configFile(fileId: "${CONFIG_FILE_UUID}", variable: 'MAVEN_GLOBAL_SETTINGS')]) {
+                	sh """
+                           mvn clean test -f pom.xml -gs $MAVEN_GLOBAL_SETTINGS && mvn deploy -f pom.xml -gs $MAVEN_GLOBAL_SETTINGS
+                    """
+                }
 			}
         }
         stage('Building Image') {
