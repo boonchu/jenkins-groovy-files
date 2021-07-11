@@ -48,7 +48,7 @@ spec:
 			steps {
 				hello "Testing"
 				// default branch is master
-				gitchkout gitUrl: "https://github.com/boonchu/java-hello-world-with-maven.git"
+				gitchkout("master", "https://github.com/boonchu/java-hello-world-with-maven.git")
 			}
         }
         stage('Building Image') {
