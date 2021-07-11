@@ -1,4 +1,4 @@
-@Library('jenkins-groovy-lib@feature/using-lib') _
+@Library('jenkins-groovy-lib@1.0.0') _
 
 // Uses Declarative syntax to run commands inside a container.
 pipeline {
