@@ -32,11 +32,14 @@ spec:
 				notify 'STARTED'
             }
         }
-        stage('Testing') {
+        stage('Testing and archive jar files') {
 			steps {
 				hello "Testing"
 				// default branch is master
 				gitchkout("master", "https://github.com/boonchu/java-hello-world-with-maven.git")
+				sh """
+					mvn clean test && mvn package
+				"""
 			}
         }
         stage('Building Image') {
