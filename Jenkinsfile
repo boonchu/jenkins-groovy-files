@@ -63,7 +63,7 @@ spec:
     post{
         always{
             echo "========always========"
-            notify currentBuild.result
+            notify "${currentBuild.currentResult}"
         }
 	}
 }
