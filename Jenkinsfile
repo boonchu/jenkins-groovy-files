@@ -35,7 +35,7 @@ spec:
         stage('Main') {
             steps {
                 // sh 'hostname'
-				call "Hello World!"
+				hello "World!"
             }
         }
     }
