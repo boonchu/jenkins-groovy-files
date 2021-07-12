@@ -39,6 +39,15 @@ spec:
     - sleep
     args:
     - infinity
+  - name: docker
+    image:  boonchu/docker:dind
+    securityContext:
+      privileged: true
+    env:
+      - name: DOCKER_TLS_CERTDIR
+        value: ""
+      - name: DOCKER_DRIVER
+        value: "overlay2"
 '''
         }
     }
@@ -167,12 +176,25 @@ spec:
         stage('Building Image') {
             steps {
                 hello "Building Image"
+                container("docker") {
+                   sh """
+                      docker build -t boonchu/maigolab_hello .
+                      docker tag boonchu/maigolab_hello boonchu/maigolab_hello:dev
+                   """
+                }
             } 
         }
 
         stage('Deploy Image') {
             steps {
                 hello "Deploying Image"
+                container("docker") {
+					withCredentials([usernamePassword(credentialsId: 'docker-login', passwordVariable: 'DOCKER_REGISTRY_PWD', usernameVariable: 'DOCKER_REGISTRY_USER')]) {
+						sh """
+							docker push boonchu/maigolab_hello:dev
+						"""
+					}
+				}
             } 
         }
     }
