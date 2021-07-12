@@ -41,7 +41,6 @@ spec:
     - infinity
   - name: docker
     image:  boonchu/docker:dind
-    imagePullPolicy: Always
     securityContext:
       privileged: true
     env:
