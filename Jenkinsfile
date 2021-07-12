@@ -189,8 +189,9 @@ spec:
             steps {
                 hello "Deploying Image"
                 container("docker") {
-					withCredentials([usernamePassword(credentialsId: 'docker-login', passwordVariable: 'DOCKER_REGISTRY_PWD', usernameVariable: 'DOCKER_REGISTRY_USER')]) {
+					withCredentials([usernamePassword(credentialsId: 'docker-login', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
 						sh """
+							docker login -u ${USERNAME} -p ${PASSWORD}
 							docker push boonchu/maigolab_hello:dev
 						"""
 					}
