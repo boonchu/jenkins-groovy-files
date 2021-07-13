@@ -195,6 +195,9 @@ spec:
                         error "LOG->ERROR :  File: ${artifactPath}, could not be found";
                     }
                 }
+
+                echo "LOG->INFO : GIT_BRANCH_NAME is ${env.GIT_BRANCH_NAME}"
+                echo "LOG->INFO : DEPLOY_MODE is ${env.DEPLOY_MODE}"
 			}
         }
 
