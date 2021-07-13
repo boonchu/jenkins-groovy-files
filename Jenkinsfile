@@ -201,12 +201,15 @@ spec:
 			}
         }
 
+        // https://michakutz.medium.com/conditionals-in-a-declarative-pipeline-jenkinsfile-d1a4a44e93bb
+        // https://stackoverflow.com/questions/53764075/declarative-pipeline-use-of-when-condition-how-to-do-nested-conditions-anyof
+        // conditional expression
         stage('Building Image') {
 			when {
-				expression { env.GIT_BRANCH_NAME ==~ /(develop|master)/ }
-				anyOf {
-					environment name: DEPLOY_MODE, value: 'true'
+				allOf {
+				    expression { env.GIT_BRANCH_NAME ==~ /(develop|master)/ }
 				}
+				expression{env.DEPLOY_MODE == true}
 			}
             steps {
                 hello 'Building Image'
@@ -224,10 +227,10 @@ spec:
 
         stage('Deploy Image') {
 			when {
-				expression { env.GIT_BRANCH_NAME ==~ /(develop|master)/ }
-				anyOf {
-					environment name: DEPLOY_MODE, value: 'true'
+				allOf {
+					expression { env.GIT_BRANCH_NAME ==~ /(develop|master)/ }
 				}
+				expression{env.DEPLOY_MODE == true}
 			}
             steps {
                 hello 'Deploying Image'
