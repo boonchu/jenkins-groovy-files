@@ -196,8 +196,8 @@ spec:
                     }
                 }
 
-                echo "LOG->INFO : GIT_BRANCH_NAME is ${env.GIT_BRANCH_NAME}"
-                echo "LOG->INFO : DEPLOY_MODE is ${env.DEPLOY_MODE}"
+                echo "LOG->INFO : GIT_BRANCH_NAME is ${params.GIT_BRANCH_NAME}"
+                echo "LOG->INFO : DEPLOY_MODE is ${params.DEPLOY_MODE}"
 			}
         }
 
@@ -206,10 +206,10 @@ spec:
         // conditional expression
         stage('Building Image') {
 			when {
-				allOf {
-				    expression { env.GIT_BRANCH_NAME ==~ /(develop|master)/ }
+				anyOf {
+				    expression { params.GIT_BRANCH_NAME =~ /(develop|master)/ }
 				}
-				expression{env.DEPLOY_MODE == true}
+				expression{params.DEPLOY_MODE == true}
 			}
             steps {
                 hello 'Building Image'
@@ -227,10 +227,10 @@ spec:
 
         stage('Deploy Image') {
 			when {
-				allOf {
-					expression { env.GIT_BRANCH_NAME ==~ /(develop|master)/ }
+				anyOf {
+					expression { params.GIT_BRANCH_NAME =~ /(develop|master)/ }
 				}
-				expression{env.DEPLOY_MODE == true}
+				expression{params.DEPLOY_MODE == true}
 			}
             steps {
                 hello 'Deploying Image'
