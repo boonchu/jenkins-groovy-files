@@ -57,7 +57,7 @@ spec:
 				hello 'Git CheckOut'
 				git branch: 'develop', url: 'https://github.com/boonchu/java-hello-world-with-maven.git'
 
-                def pom = readMavenPom file: 'pom.xml'
+                pom = readMavenPom file: 'pom.xml'
                 ARTIFACT_VERSION = pom.version
                 ARTIFACT_PKG_NAME = pom.packaging
                 echo "LOG->INFO : ARTIFACT_VERSION is ${ARTIFACT_VERSION}"
