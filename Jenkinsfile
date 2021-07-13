@@ -134,13 +134,11 @@ spec:
                 // read artifact version
                 script {
 
-                    // def pom = readMavenPom file: 'pom.xml'
-                    // ARTIFACT_VERSION = pom.version
-                    // ARTIFACT_PKG_NAME = pom.packaging
-                    // echo "LOG->INFO : ARTIFACT_VERSION is ${ARTIFACT_VERSION}"
-                    // echo "LOG->INFO : ARTIFACT_PKG_NAME is ${ARTIFACT_PKG_NAME}"
-                    def pom = readArtifactInfo()
-
+                    def pom = readMavenPom file: 'pom.xml'
+                    ARTIFACT_VERSION = pom.version
+                    ARTIFACT_PKG_NAME = pom.packaging
+                    echo "LOG->INFO : ARTIFACT_VERSION is ${ARTIFACT_VERSION}"
+                    echo "LOG->INFO : ARTIFACT_PKG_NAME is ${ARTIFACT_PKG_NAME}"
 
                     filesByGlob = findFiles(glob: "target/*.${ARTIFACT_PKG_NAME}");
                     echo "LOG->INFO : DEBUG ARTIFACT ${filesByGlob[0].name} ${filesByGlob[0].path} ${filesByGlob[0].directory} ${filesByGlob[0].length} ${filesByGlob[0].lastModified}"
