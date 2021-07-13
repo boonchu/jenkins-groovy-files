@@ -205,7 +205,7 @@ spec:
 			when {
 				expression { env.GIT_BRANCH_NAME ==~ /(develop|master)/ }
 				anyOf {
-					environment name: env.DEPLOY_MODE, value: 'true'
+					environment name: DEPLOY_MODE, value: 'true'
 				}
 			}
             steps {
@@ -226,7 +226,7 @@ spec:
 			when {
 				expression { env.GIT_BRANCH_NAME ==~ /(develop|master)/ }
 				anyOf {
-					environment name: env.DEPLOY_MODE, value: 'true'
+					environment name: DEPLOY_MODE, value: 'true'
 				}
 			}
             steps {
