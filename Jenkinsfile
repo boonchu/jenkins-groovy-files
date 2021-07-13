@@ -1,9 +1,19 @@
+// Jenkins Groovy script
 @Library('jenkins-groovy-lib@1.0.1') _
 
 
 // Uses Declarative syntax to run commands inside a container.
 pipeline {
 
+    // https://devopscube.com/declarative-pipeline-parameters/
+    parameters {
+        string(name: 'GIT_BRANCH_NAME', defaultValue: 'develop', description: 'Git branch to use for the build.')
+        string(name: 'GIT_URL', defaultValue: 'https://github.com/boonchu/java-hello-world-with-maven.git', description: 'Git project.')
+        booleanParam(name: 'DEPLOY_MODE', defaultValue: true, description: 'Toggle on/off deployment')
+    }
+    // * end of params *
+
+    // environment values
     environment {
         // Maven settings.xml
         def CONFIG_FILE_UUID   = '8ac4e324-359d-4b24-9cc3-04893a7d56ce'
@@ -24,7 +34,9 @@ pipeline {
         // Jenkins credential id to authenticate to Nexus OSS
         NEXUS_CREDENTIAL_ID = "nexus"
     }
+    // * end of envs *
 
+    // k8s jenkins jnlp agents
     agent {
         kubernetes {
             defaultContainer 'openjdk11'
@@ -51,11 +63,14 @@ spec:
 '''
         }
     }
+	// * end of k8s *
+
+    // stages
     stages {
         stage('Git CheckOut') {
             steps {
 				hello 'Git CheckOut'
-				git branch: 'develop', url: 'https://github.com/boonchu/java-hello-world-with-maven.git'
+				git branch: "${params.GIT_BRANCH_NAME}", url: "${params.GIT_URL}"
 				script {
 					read_artifact_info()
 				}
@@ -178,6 +193,12 @@ spec:
         }
 
         stage('Building Image') {
+			when {
+				expression { BRANCH_NAME ==~ /(develop|master)/ }
+				anyOf {
+					environment name: DEPLOY_MODE, value: true
+				}
+			}
             steps {
                 hello 'Building Image'
                 container('docker') {
@@ -193,6 +214,12 @@ spec:
         }
 
         stage('Deploy Image') {
+			when {
+				expression { BRANCH_NAME ==~ /(develop|master)/ }
+				anyOf {
+					environment name: DEPLOY_MODE, value: true
+				}
+			}
             steps {
                 hello 'Deploying Image'
                 container('docker') {
@@ -206,6 +233,7 @@ spec:
             } 
         }
     }
+	// * end of stages *
 
     post{
         always{
