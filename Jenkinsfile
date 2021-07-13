@@ -56,8 +56,8 @@ spec:
         stage('Git CheckOut') {
             steps {
 				hello 'Git CheckOut'
-				// default branch is master
-				gitchkout("develop", "https://github.com/boonchu/java-hello-world-with-maven.git")
+				git branch: "develop", url: "https://github.com/boonchu/java-hello-world-with-maven.git"
+				def artifact = readArtifactInfo()
             }
         }
 
@@ -133,11 +133,15 @@ spec:
                 // https://dzone.com/articles/jenkins-publish-maven-artifacts-to-nexus-oss-using
                 // read artifact version
                 script {
-                    def pom = readMavenPom file: 'pom.xml'
-                    ARTIFACT_VERSION = pom.version
-                    ARTIFACT_PKG_NAME = pom.packaging
-                    echo "LOG->INFO : ARTIFACT_VERSION is ${ARTIFACT_VERSION}"
-                    echo "LOG->INFO : ARTIFACT_PKG_NAME is ${ARTIFACT_PKG_NAME}"
+
+                    // def pom = readMavenPom file: 'pom.xml'
+                    // ARTIFACT_VERSION = pom.version
+                    // ARTIFACT_PKG_NAME = pom.packaging
+                    // echo "LOG->INFO : ARTIFACT_VERSION is ${ARTIFACT_VERSION}"
+                    // echo "LOG->INFO : ARTIFACT_PKG_NAME is ${ARTIFACT_PKG_NAME}"
+                    def pom = readArtifactInfo()
+
+
                     filesByGlob = findFiles(glob: "target/*.${ARTIFACT_PKG_NAME}");
                     echo "LOG->INFO : DEBUG ARTIFACT ${filesByGlob[0].name} ${filesByGlob[0].path} ${filesByGlob[0].directory} ${filesByGlob[0].length} ${filesByGlob[0].lastModified}"
                     artifactPath = filesByGlob[0].path;
@@ -191,11 +195,12 @@ spec:
         stage('Deploy Image') {
             steps {
                 hello "Deploying Image"
+                def BUILD_NAME = "${currentBuild.displayName}"
                 container("docker") {
 					withCredentials([usernamePassword(credentialsId: 'docker-login', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
 						sh """
 							docker login -u ${USERNAME} -p ${PASSWORD}
-							docker push boonchu/maigolab_hello:dev
+							docker push boonchu/maigolab_hello:${BUILD_NAME}
 						"""
 					}
 				}
