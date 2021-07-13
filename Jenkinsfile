@@ -18,6 +18,7 @@ pipeline {
         // Maven settings.xml
         def CONFIG_FILE_UUID   = '8ac4e324-359d-4b24-9cc3-04893a7d56ce'
 
+		def GIT_BRANCH_NAME = "${params.GIT_BRANCH_NAME}"
 		def DEPLOY_MODE = "${params.DEPLOY_MODE}"
 
         // Sonar Settings
@@ -196,7 +197,7 @@ spec:
 
         stage('Building Image') {
 			when {
-				expression { BRANCH_NAME ==~ /(develop|master)/ }
+				expression { GIT_BRANCH_NAME ==~ /(develop|master)/ }
 				anyOf {
 					environment name: DEPLOY_MODE, value: 'true'
 				}
@@ -217,7 +218,7 @@ spec:
 
         stage('Deploy Image') {
 			when {
-				expression { BRANCH_NAME ==~ /(develop|master)/ }
+				expression { GIT_BRANCH_NAME ==~ /(develop|master)/ }
 				anyOf {
 					environment name: DEPLOY_MODE, value: 'true'
 				}
