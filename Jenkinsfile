@@ -56,7 +56,7 @@ spec:
         stage('Git CheckOut') {
             steps {
 				hello 'Git CheckOut'
-				git branch: "develop", url: "https://github.com/boonchu/java-hello-world-with-maven.git"
+				git branch: 'develop', url: 'https://github.com/boonchu/java-hello-world-with-maven.git'
                 def pom = readMavenPom file: 'pom.xml'
                 ARTIFACT_VERSION = pom.version
                 ARTIFACT_PKG_NAME = pom.packaging
