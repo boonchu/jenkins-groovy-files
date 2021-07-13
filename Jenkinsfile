@@ -57,9 +57,7 @@ spec:
             steps {
 				hello 'Git CheckOut'
 				git branch: "develop", url: "https://github.com/boonchu/java-hello-world-with-maven.git"
-				script {
-					readArtifactInfo
-				}
+				readArtifactInfo
             }
         }
 
@@ -180,12 +178,15 @@ spec:
         stage('Building Image') {
             steps {
                 hello "Building Image"
+				script {
+                	def BUILD_NAME = "${currentBuild.displayName}"
+				}
                 container("docker") {
 					withCredentials([usernamePassword(credentialsId: 'nexus', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                    		sh """
 							curl -u ${USERNAME}:${PASSWORD} http://${NEXUS_URL}/repository/springboot/info/maigo/lab/hello/maigolab_hello/1.0.2/maigolab_hello-1.0.2.jar -vvv -o target/maigolab_hello-1.0.2.jar
                           	docker build -t boonchu/maigolab_hello .
-                          	docker tag boonchu/maigolab_hello boonchu/maigolab_hello:dev
+                          	docker tag boonchu/maigolab_hello boonchu/maigolab_hello:${BUILD_NAME}
                    		"""
 					}
                 }
