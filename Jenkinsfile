@@ -18,6 +18,8 @@ pipeline {
         // Maven settings.xml
         def CONFIG_FILE_UUID   = '8ac4e324-359d-4b24-9cc3-04893a7d56ce'
 
+		def DEPLOY_MODE = "${params.DEPLOY_MODE}"
+
         // Sonar Settings
         def SONAR_SERVER_URL     = 'http://172.30.30.102:9000'
         def SONAR_SCANNER_HASH   = '6d401f63ef2d3cbae6c1536064077d2178bb6d2e'
@@ -196,7 +198,7 @@ spec:
 			when {
 				expression { BRANCH_NAME ==~ /(develop|master)/ }
 				anyOf {
-					environment name: DEPLOY_MODE, value: true
+					environment name: DEPLOY_MODE, value: 'true'
 				}
 			}
             steps {
@@ -217,7 +219,7 @@ spec:
 			when {
 				expression { BRANCH_NAME ==~ /(develop|master)/ }
 				anyOf {
-					environment name: DEPLOY_MODE, value: true
+					environment name: DEPLOY_MODE, value: 'true'
 				}
 			}
             steps {
