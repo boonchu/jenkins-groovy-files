@@ -189,7 +189,7 @@ spec:
         stage('Building Image') {
             steps {
                 hello 'Building Image'
-                BUILD_NAME = currentBuild.displayName
+                BUILD_NAME = "${currentBuild.displayName}"
                 container('docker') {
 					withCredentials([usernamePassword(credentialsId: 'nexus', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                    		sh """
@@ -205,7 +205,7 @@ spec:
         stage('Deploy Image') {
             steps {
                 hello 'Deploying Image'
-                BUILD_NAME = currentBuild.displayName
+                BUILD_NAME = "${currentBuild.displayName}"
                 container('docker') {
 					withCredentials([usernamePassword(credentialsId: 'docker-login', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
 						sh """
