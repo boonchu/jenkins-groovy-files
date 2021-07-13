@@ -189,9 +189,7 @@ spec:
         stage('Building Image') {
             steps {
                 hello "Building Image"
-				script {
-                	def BUILD_NAME = "${currentBuild.displayName}"
-				}
+                BUILD_NAME = currentBuild.displayName
                 container("docker") {
 					withCredentials([usernamePassword(credentialsId: 'nexus', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                    		sh """
