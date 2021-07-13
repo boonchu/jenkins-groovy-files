@@ -57,7 +57,7 @@ spec:
             steps {
 				hello 'Git CheckOut'
 				git branch: "develop", url: "https://github.com/boonchu/java-hello-world-with-maven.git"
-				def artifact = readArtifactInfo()
+				readArtifactInfo
             }
         }
 
