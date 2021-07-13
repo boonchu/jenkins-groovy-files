@@ -204,7 +204,6 @@ spec:
         stage('Deploy Image') {
             steps {
                 hello 'Deploying Image'
-                JOB_DISPLAY_NAME = currentBuild.displayName
                 container('docker') {
 					withCredentials([usernamePassword(credentialsId: 'docker-login', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
 						sh """
