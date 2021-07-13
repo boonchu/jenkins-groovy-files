@@ -16,12 +16,13 @@ pipeline {
 
     // environment values
     // https://e.printstacktrace.blog/jenkins-pipeline-environment-variables-the-definitive-guide/
+    // https://www.lambdatest.com/blog/set-jenkins-pipeline-environment-variables-list/
     environment {
         // Maven settings.xml
         def CONFIG_FILE_UUID   = '8ac4e324-359d-4b24-9cc3-04893a7d56ce'
 
 		def GIT_BRANCH_NAME = "${params.GIT_BRANCH_NAME}"
-		def DEPLOY_MODE = params.DEPLOY_MODE
+		def DEPLOY_MODE = "${params.DEPLOY_MODE}"
 
         // Sonar Settings
         def SONAR_SERVER_URL     = 'http://172.30.30.102:9000'
@@ -201,7 +202,7 @@ spec:
 			when {
 				expression { env.GIT_BRANCH_NAME ==~ /(develop|master)/ }
 				anyOf {
-					environment name: env.DEPLOY_MODE, value: true
+					environment name: env.DEPLOY_MODE, value: 'true'
 				}
 			}
             steps {
@@ -222,7 +223,7 @@ spec:
 			when {
 				expression { env.GIT_BRANCH_NAME ==~ /(develop|master)/ }
 				anyOf {
-					environment name: env.DEPLOY_MODE, value: true
+					environment name: env.DEPLOY_MODE, value: 'true'
 				}
 			}
             steps {
