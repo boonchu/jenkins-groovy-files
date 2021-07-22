@@ -1,5 +1,5 @@
 // Jenkins Groovy script
-@Library('jenkins-groovy-lib@1.0.1') _
+@Library('jenkins-groovy-lib@feature/using-folders') _
 
 
 // Uses Declarative syntax to run commands inside a container.
@@ -79,6 +79,7 @@ spec:
 				git branch: "${params.GIT_BRANCH_NAME}", url: "${params.GIT_URL}"
 				script {
 					read_artifact_info()
+					folders()
 				}
 
             }
@@ -152,7 +153,11 @@ spec:
                        mvn package -DskipTests=true -f pom.xml -gs $MAVEN_GLOBAL_SETTINGS
                     """
                 }
+			}
+		}
 
+		stage('Publish jar to Nexus') {
+			steps {
                 // https://dzone.com/articles/jenkins-publish-maven-artifacts-to-nexus-oss-using
                 // read artifact version
                 script {
@@ -203,6 +208,7 @@ spec:
 
         // https://michakutz.medium.com/conditionals-in-a-declarative-pipeline-jenkinsfile-d1a4a44e93bb
         // https://stackoverflow.com/questions/53764075/declarative-pipeline-use-of-when-condition-how-to-do-nested-conditions-anyof
+        // https://technology.first8.nl/how-to-start-with-declarative-jenkins-pipelines/
         // conditional expression
         stage('Building Image') {
 			when {
