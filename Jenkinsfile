@@ -225,9 +225,15 @@ spec:
 					withCredentials([usernamePassword(credentialsId: 'nexus', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                    		sh """
 							curl -u ${USERNAME}:${PASSWORD} http://${NEXUS_URL}/repository/springboot/info/maigo/lab/hello/maigolab_hello/1.0.2/maigolab_hello-1.0.2.jar -vvv -o target/maigolab_hello-1.0.2.jar
+                   		"""
+					}
+
+					withCredentials([usernamePassword(credentialsId: 'docker-login', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+						sh """
+							docker login -u ${USERNAME} -p ${PASSWORD}
                           	docker build -t boonchu/maigolab_hello .
                           	docker tag boonchu/maigolab_hello boonchu/maigolab_hello:${currentBuild.displayName}
-                   		"""
+						"""
 					}
                 }
             } 
