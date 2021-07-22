@@ -77,6 +77,11 @@ spec:
         stage('Git CheckOut') {
             steps {
 				hello 'Git CheckOut'
+                withCredentials([usernamePassword(credentialsId: 'docker-login', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')])  {
+                    sh """
+                        docker login -u ${USERNAME} -p ${PASSWORD}
+                    """
+                }
 				git branch: "${params.GIT_BRANCH_NAME}", url: "${params.GIT_URL}"
 				script {
 					read_artifact_info()
