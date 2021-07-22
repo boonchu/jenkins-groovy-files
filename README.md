@@ -1,3 +1,7 @@
+## How to use Pipeline DSL plugin
+
+* https://github.com/jenkinsci/pipeline-plugin/blob/master/TUTORIAL.md
+
 ## how to git-flow
 
 * https://gist.github.com/JamesMGreene/cdd0ac49f90c987e45ac

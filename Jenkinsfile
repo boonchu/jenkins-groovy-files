@@ -25,9 +25,10 @@ pipeline {
 		def DEPLOY_MODE = "${params.DEPLOY_MODE}"
 
         // Sonar Settings
-        def SONAR_SERVER_URL     = 'http://172.30.30.102:9000'
-        def SONAR_SCANNER_HASH   = '6d401f63ef2d3cbae6c1536064077d2178bb6d2e'
+        def SONAR_SERVER_URL     = 'http://sonar.infra.loc'
+        def SONAR_SCANNER_HASH   = '81ac0554454482e834b04c84e3d2525927f4718f'
         def SONAR_PLUGIN_VERSION = '3.9.0.2155'
+        def SONAR_PROJECT_KEY    = 'java'
 
         // Nexus settings
         NEXUS_VERSION = "nexus3"
@@ -103,7 +104,7 @@ spec:
                 configFileProvider([configFile(fileId: "${CONFIG_FILE_UUID}", variable: 'MAVEN_GLOBAL_SETTINGS')]) {
                 	sh """
                        mvn clean compile org.sonarsource.scanner.maven:sonar-maven-plugin:${SONAR_PLUGIN_VERSION}:sonar -f pom.xml \
-                            -Dsonar.projectKey=maven-code-analysis \
+                            -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
                             -Dsonar.host.url=${SONAR_SERVER_URL} \
                             -Dsonar.login=${SONAR_SCANNER_HASH} \
                             -gs ${MAVEN_GLOBAL_SETTINGS}
@@ -121,6 +122,7 @@ spec:
                             mvn org.jacoco:jacoco-maven-plugin:prepare-agent -f pom.xml clean test \
                                  -Dautoconfig.skip=true -Dmaven.test.skip=false \
                                  -Dmaven.test.failure.ignore=true sonar:sonar \
+                                 -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
                                  -Dsonar.host.url=${SONAR_SERVER_URL} \
                                  -Dsonar.login=${SONAR_SCANNER_HASH} \
                                  -gs ${MAVEN_GLOBAL_SETTINGS}
