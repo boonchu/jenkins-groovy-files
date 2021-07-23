@@ -76,14 +76,7 @@ spec:
     stages {
         stage('Git CheckOut') {
             steps {
-				hello 'Git CheckOut'
-                container('docker') {
-                    withCredentials([usernamePassword(credentialsId: 'docker-login', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')])  {
-                        sh """
-                            docker login -u ${USERNAME} -p ${PASSWORD}
-                        """
-                    }
-				}
+				outputs 'Git CheckOut'
 				git branch: "${params.GIT_BRANCH_NAME}", url: "${params.GIT_URL}"
 				script {
 					read_artifact_info()
@@ -95,14 +88,14 @@ spec:
 
         stage('Sending Notification when started') {
             steps {
-				hello 'Sending Notification when started'
+				outputs 'Sending Notification when started'
 				notify 'STARTED'
             }
         }
 
         stage('Static Analysis and simple UnitTest') {
             steps {
-				hello 'Static Analysis and simple UnitTest'
+				outputs 'Static Analysis and simple UnitTest'
                 echo "LOG-->INFO-->SONAR_PLUGIN_VERSION : ${SONAR_PLUGIN_VERSION}"
                 echo "LOG-->INFO-->SONAR_SERVER_URL : ${SONAR_SERVER_URL}"
                 echo "LOG-->INFO-->SONAR_SCANNER_HASH : ${SONAR_SCANNER_HASH}"
@@ -154,7 +147,7 @@ spec:
 
         stage('Archive jar files') {
 			steps {
-				hello "Archive jar files"
+				outputs "Archive jar files"
 
                 // maven package
                 configFileProvider([configFile(fileId: "${CONFIG_FILE_UUID}", variable: 'MAVEN_GLOBAL_SETTINGS')]) {
@@ -227,7 +220,7 @@ spec:
 				expression{params.DEPLOY_MODE == true}
 			}
             steps {
-                hello 'Building Image'
+                outputs 'Building Image'
                 container('docker') {
 					withCredentials([usernamePassword(credentialsId: 'nexus', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                    		sh """
@@ -254,11 +247,10 @@ spec:
 				expression{params.DEPLOY_MODE == true}
 			}
             steps {
-                hello 'Deploying Image'
+                outputs 'Deploying Image'
                 container('docker') {
 					withCredentials([usernamePassword(credentialsId: 'docker-login', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
 						sh """
-							docker login -u ${USERNAME} -p ${PASSWORD}
 							docker push boonchu/maigolab_hello:${currentBuild.displayName}
 						"""
 					}
