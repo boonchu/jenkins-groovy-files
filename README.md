@@ -1,3 +1,8 @@
+## Branching per task strategy
+
+* https://stackoverflow.com/questions/22098634/how-to-do-a-branch-per-task-strategy-with-git 
+* https://www.perforce.com/blog/vcs/best-branching-strategies-high-velocity-development
+
 ## How to use Pipeline DSL plugin
 
 * https://github.com/jenkinsci/pipeline-plugin/blob/master/TUTORIAL.md

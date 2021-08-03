@@ -40,6 +40,12 @@ pipeline {
         NEXUS_REPOSITORY = "springboot"
         // Jenkins credential id to authenticate to Nexus OSS
         NEXUS_CREDENTIAL_ID = "nexus"
+
+        // Should be in discovery of build process
+        def ARTIFACT_PKG_VERSION = ''
+        def ARTIFACT_PKG_NAME  = ''
+        def ARTIFACT_PKG_SUFFIX  = ''
+        def ARTIFACT_PKG_GROUP  = ''
     }
     // * end of envs *
 
@@ -79,10 +85,15 @@ spec:
 				outputs 'Git CheckOut'
 				git branch: "${params.GIT_BRANCH_NAME}", url: "${params.GIT_URL}"
 				script {
+					// artifact info discovery
 					read_artifact_info()
+                    echo "LOG->INFO : ARTIFACT_PKG_VERSION is ${env.ARTIFACT_PKG_VERSION}"
+                    echo "LOG->INFO : ARTIFACT_PKG_NAME is ${env.ARTIFACT_PKG_NAME}"
+                    echo "LOG->INFO : ARTIFACT_PKG_SUFFIX is ${env.ARTIFACT_PKG_SUFFIX}"
+                    echo "LOG->INFO : ARTIFACT_PKG_GROUP is ${env.ARTIFACT_PKG_GROUP}"
+
 					folders()
 				}
-
             }
         }
 
@@ -148,7 +159,6 @@ spec:
         stage('Archive jar files') {
 			steps {
 				outputs "Archive jar files"
-
                 // maven package
                 configFileProvider([configFile(fileId: "${CONFIG_FILE_UUID}", variable: 'MAVEN_GLOBAL_SETTINGS')]) {
                 	sh """
@@ -163,36 +173,41 @@ spec:
                 // https://dzone.com/articles/jenkins-publish-maven-artifacts-to-nexus-oss-using
                 // read artifact version
                 script {
-
+					/*
                     def pom = readMavenPom file: 'pom.xml'
-                    ARTIFACT_VERSION = pom.version
-                    ARTIFACT_PKG_NAME = pom.packaging
-                    echo "LOG->INFO : ARTIFACT_VERSION is ${ARTIFACT_VERSION}"
-                    echo "LOG->INFO : ARTIFACT_PKG_NAME is ${ARTIFACT_PKG_NAME}"
+                    env.ARTIFACT_PKG_VERSION = pom.version
+                    env.ARITFACT_PKG_NAME = pom.artifactId
+                    env.ARTIFACT_PKG_SUFFIX = pom.packaging
+                    env.ARTIFACT_PKG_GROUP = pom.groupId
+                    echo "LOG->INFO : ARTIFACT_PKG_VERSION is ${env.ARTIFACT_PKG_VERSION}"
+                    echo "LOG->INFO : ARTIFACT_PKG_NAME is ${env.ARTIFACT_PKG_NAME}"
+                    echo "LOG->INFO : ARTIFACT_PKG_SUFFIX is ${env.ARTIFACT_PKG_SUFFIX}"
+                    echo "LOG->INFO : ARTIFACT_PKG_GROUP is ${env.ARTIFACT_PKG_GROUP}"
+					*/
 
-                    filesByGlob = findFiles(glob: "target/*.${ARTIFACT_PKG_NAME}");
+                    filesByGlob = findFiles(glob: "target/*.${env.ARTIFACT_PKG_SUFFIX}");
                     echo "LOG->INFO : DEBUG ARTIFACT ${filesByGlob[0].name} ${filesByGlob[0].path} ${filesByGlob[0].directory} ${filesByGlob[0].length} ${filesByGlob[0].lastModified}"
                     artifactPath = filesByGlob[0].path;
                     artifactExists = fileExists artifactPath;
                     if(artifactExists) {                
-                         echo "LOG->INFO : File: ${artifactPath}, group: ${pom.groupId}, packaging: ${pom.packaging}, version ${pom.version}";
+                         echo "LOG->INFO : File: ${artifactPath}, group: ${env.ARTIFACT_PKG_GROUP}, packaging: ${env.ARTIFACT_PKG_SUFFIX}, version ${env.ARTIFACT_PKG_VERSION}";
                          nexusArtifactUploader(
-                            nexusVersion: NEXUS_VERSION,
-                            protocol: NEXUS_PROTOCOL,
-                            nexusUrl: NEXUS_URL,
-                            groupId: pom.groupId,
-                            version: pom.version,
-                            repository: NEXUS_REPOSITORY,
-                            credentialsId: NEXUS_CREDENTIAL_ID,
+                            nexusVersion: env.NEXUS_VERSION,
+                            protocol: env.NEXUS_PROTOCOL,
+                            nexusUrl: env.NEXUS_URL,
+                            groupId: env.ARTIFACT_PKG_GROUP,
+                            version: env.ARTIFACT_PKG_VERSION,
+                            repository: env.NEXUS_REPOSITORY,
+                            credentialsId: env.NEXUS_CREDENTIAL_ID,
                             artifacts: [
                                 // Artifact generated such as .jar, .ear and .war files.
-                                [artifactId: pom.artifactId,
+                                [artifactId: env.ARTIFACT_PKG_NAME,
                                 classifier: '',
                                 file: artifactPath,
-                                type: pom.packaging],
+                                type: env.ARTIFACT_PKG_SUFFIX],
 
                                 // Lets upload the pom.xml file for additional information for Transitive dependencies
-                                [artifactId: pom.artifactId,
+                                [artifactId: env.ARTIFACT_PKG_SUFFIX,
                                 classifier: '',
                                 file: "pom.xml",
                                 type: "pom"]
