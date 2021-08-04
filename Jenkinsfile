@@ -21,8 +21,8 @@ pipeline {
         // Maven settings.xml
         def CONFIG_FILE_UUID   = '8ac4e324-359d-4b24-9cc3-04893a7d56ce'
 
-		def GIT_BRANCH_NAME = "${params.GIT_BRANCH_NAME}"
-		def DEPLOY_MODE = "${params.DEPLOY_MODE}"
+        def GIT_BRANCH_NAME = "${params.GIT_BRANCH_NAME}"
+        def DEPLOY_MODE = "${params.DEPLOY_MODE}"
 
         // Sonar Settings
         def SONAR_SERVER_URL     = 'http://sonar.infra.loc'
@@ -35,7 +35,7 @@ pipeline {
         // This can be http or https
         NEXUS_PROTOCOL = "http"
         // Where your Nexus is running
-        NEXUS_URL = "172.30.30.102:8081"
+        NEXUS_URL = "nexus.infra.loc:8081"
         // Repository where we will upload the artifact
         NEXUS_REPOSITORY = "springboot"
         // Jenkins credential id to authenticate to Nexus OSS
@@ -101,8 +101,8 @@ spec:
 
         stage('Sending Notification when started') {
             steps {
-				outputs 'Sending Notification when started'
-				notify 'STARTED'
+                outputs 'Sending Notification when started'
+                notify 'STARTED'
             }
         }
 
@@ -159,34 +159,23 @@ spec:
         }
 
         stage('Archive jar files') {
-			steps {
-				outputs "Archive jar files"
+            steps {
+                outputs "Archive jar files"
                 // maven package
                 configFileProvider([configFile(fileId: "${CONFIG_FILE_UUID}", variable: 'MAVEN_GLOBAL_SETTINGS')]) {
                 	sh """
                        mvn package -DskipTests=true -f pom.xml --batch-mode -gs $MAVEN_GLOBAL_SETTINGS
                     """
                 }
-			}
+            }
 		}
 
-		stage('Publish jar to Nexus') {
-			steps {
+        stage('Publish jar to Nexus') {
+            steps {
                 // https://dzone.com/articles/jenkins-publish-maven-artifacts-to-nexus-oss-using
                 // read artifact version
                 script {
-					/*
-                    def pom = readMavenPom file: 'pom.xml'
-                    env.ARTIFACT_PKG_VERSION = pom.version
-                    env.ARITFACT_PKG_NAME = pom.artifactId
-                    env.ARTIFACT_PKG_SUFFIX = pom.packaging
-                    env.ARTIFACT_PKG_GROUP = pom.groupId
-                    echo "LOG->INFO : ARTIFACT_PKG_VERSION is ${env.ARTIFACT_PKG_VERSION}"
-                    echo "LOG->INFO : ARTIFACT_PKG_NAME is ${env.ARTIFACT_PKG_NAME}"
-                    echo "LOG->INFO : ARTIFACT_PKG_SUFFIX is ${env.ARTIFACT_PKG_SUFFIX}"
-                    echo "LOG->INFO : ARTIFACT_PKG_GROUP is ${env.ARTIFACT_PKG_GROUP}"
-					*/
-
+            		// Nexus artifact repository
                     filesByGlob = findFiles(glob: "target/*.${env.ARTIFACT_PKG_SUFFIX}");
                     echo "LOG->INFO : DEBUG ARTIFACT ${filesByGlob[0].name} ${filesByGlob[0].path} ${filesByGlob[0].directory} ${filesByGlob[0].length} ${filesByGlob[0].lastModified}"
                     artifactPath = filesByGlob[0].path;
@@ -207,7 +196,7 @@ spec:
                                 classifier: '',
                                 file: artifactPath,
                                 type: env.ARTIFACT_PKG_SUFFIX],
-
+            
                                 // Lets upload the pom.xml file for additional information for Transitive dependencies
                                 [artifactId: env.ARTIFACT_PKG_SUFFIX,
                                 classifier: '',
@@ -219,10 +208,10 @@ spec:
                         error "LOG->ERROR :  File: ${artifactPath}, could not be found";
                     }
                 }
-
+            
                 echo "LOG->INFO : GIT_BRANCH_NAME is ${params.GIT_BRANCH_NAME}"
                 echo "LOG->INFO : DEPLOY_MODE is ${params.DEPLOY_MODE}"
-			}
+            }
         }
 
         // https://michakutz.medium.com/conditionals-in-a-declarative-pipeline-jenkinsfile-d1a4a44e93bb
@@ -230,49 +219,49 @@ spec:
         // https://technology.first8.nl/how-to-start-with-declarative-jenkins-pipelines/
         // conditional expression
         stage('Building Image') {
-			when {
-				anyOf {
-				    expression { params.GIT_BRANCH_NAME =~ /(develop|master)/ }
-				}
-				expression{params.DEPLOY_MODE == true}
-			}
-            steps {
-                outputs 'Building Image'
-                container('docker') {
-					withCredentials([usernamePassword(credentialsId: 'nexus', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                   		sh """
-							curl -u ${USERNAME}:${PASSWORD} http://${NEXUS_URL}/repository/springboot/info/maigo/lab/hello/maigolab_hello/1.0.2/maigolab_hello-1.0.2.jar -vvv -o target/maigolab_hello-1.0.2.jar
-                   		"""
-					}
-
-					withCredentials([usernamePassword(credentialsId: 'docker-login', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-						sh """
-							docker login -u ${USERNAME} -p ${PASSWORD}
-                          	docker build -t boonchu/maigolab_hello .
-                          	docker tag boonchu/maigolab_hello boonchu/maigolab_hello:${currentBuild.displayName}
-						"""
-					}
-                }
-            } 
+           when {
+             	anyOf {
+             	    expression { params.GIT_BRANCH_NAME =~ /(develop|master)/ }
+             	}
+             	expression{params.DEPLOY_MODE == true}
+           }
+           steps {
+               outputs 'Building Image'
+               container('docker') {
+           		withCredentials([usernamePassword(credentialsId: 'nexus', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                  		sh """
+           				curl -u ${USERNAME}:${PASSWORD} http://${NEXUS_URL}/repository/springboot/info/maigo/lab/hello/maigolab_hello/1.0.2/maigolab_hello-1.0.2.jar -vvv -o target/maigolab_hello-1.0.2.jar
+                  		"""
+           		}
+           
+           		withCredentials([usernamePassword(credentialsId: 'docker-login', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+           			sh """
+           				docker login -u ${USERNAME} -p ${PASSWORD}
+                         	docker build -t boonchu/maigolab_hello .
+                         	docker tag boonchu/maigolab_hello boonchu/maigolab_hello:${currentBuild.displayName}
+           			"""
+           		}
+               }
+           } 
         }
 
         stage('Deploy Image') {
-			when {
-				anyOf {
-					expression { params.GIT_BRANCH_NAME =~ /(develop|master)/ }
-				}
-				expression{params.DEPLOY_MODE == true}
-			}
-            steps {
-                outputs 'Deploying Image'
-                container('docker') {
-					withCredentials([usernamePassword(credentialsId: 'docker-login', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-						sh """
-							docker push boonchu/maigolab_hello:${currentBuild.displayName}
-						"""
-					}
-				}
-            } 
+           when {
+               anyOf {
+                   expression { params.GIT_BRANCH_NAME =~ /(develop|master)/ }
+               }
+               expression{params.DEPLOY_MODE == true}
+           }
+           steps {
+               outputs 'Deploying Image'
+               container('docker') {
+                   withCredentials([usernamePassword(credentialsId: 'docker-login', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                   		sh """
+                   			docker push boonchu/maigolab_hello:${currentBuild.displayName}
+                   		"""
+                   }
+               }
+           } 
         }
     }
 	// * end of stages *
