@@ -76,28 +76,26 @@ spec:
     // stages
     stages {
         stage('Git CheckOut and Discovery') {
-            environment {
-                ARTIFACT_PKG_VERSION="${readMavenPom().version}"
-                ARTIFACT_PKG_NAME="${readMavenPom().artifactId}"
-                ARTIFACT_PKG_SUFFIX="${readMavenPom().packaging}"
-                ARTIFACT_PKG_GROUP="${readMavenPom().groupId}"
-            }
             steps {
 				outputs 'Git CheckOut'
 				git branch: "${params.GIT_BRANCH_NAME}", url: "${params.GIT_URL}"
-				script {
-					// artifact info discovery
-					read_artifact_info()
+                script {
+                    // artifact info discovery
+                    def pom = read_artifact_info()
                     // https://maven.apache.org/pom.html
                     // https://stackoverflow.com/questions/53541489/updating-environment-global-variable-in-jenkins-pipeline-from-the-stage-level/53541813
                     // video - https://www.youtube.com/watch?v=KwQDxwZRZiE
+                    env.ARTIFACT_PKG_VERSION="${pom.version}"
+                    env.ARTIFACT_PKG_NAME="${pom.artifactId}"
+                    env.ARTIFACT_PKG_SUFFIX="${pom.packaging}"
+                    env.ARTIFACT_PKG_GROUP="${pom.groupId}"
                     echo "LOG->INFO : ARTIFACT_PKG_VERSION is ${env.ARTIFACT_PKG_VERSION}"
                     echo "LOG->INFO : ARTIFACT_PKG_NAME is ${env.ARTIFACT_PKG_NAME}"
                     echo "LOG->INFO : ARTIFACT_PKG_SUFFIX is ${env.ARTIFACT_PKG_SUFFIX}"
                     echo "LOG->INFO : ARTIFACT_PKG_GROUP is ${env.ARTIFACT_PKG_GROUP}"
 
-					folders()
-				}
+                    folders()
+                }
             }
         }
 
@@ -105,6 +103,10 @@ spec:
             steps {
 				outputs 'Sending Notification when started'
 				notify 'STARTED'
+                echo "LOG->INFO : ARTIFACT_PKG_VERSION is ${env.ARTIFACT_PKG_VERSION}"
+                echo "LOG->INFO : ARTIFACT_PKG_NAME is ${env.ARTIFACT_PKG_NAME}"
+                echo "LOG->INFO : ARTIFACT_PKG_SUFFIX is ${env.ARTIFACT_PKG_SUFFIX}"
+                echo "LOG->INFO : ARTIFACT_PKG_GROUP is ${env.ARTIFACT_PKG_GROUP}"
             }
         }
 
