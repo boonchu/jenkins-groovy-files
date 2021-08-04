@@ -77,10 +77,10 @@ spec:
     stages {
         stage('Git CheckOut and Discovery') {
             environment {
-                ARTIFACT_PKG_VERSION=readMavenPom().version
-                ARTIFACT_PKG_NAME=readMavenPom().artifactId
-                ARTIFACT_PKG_SUFFIX=readMavenPom().packaging
-                ARTIFACT_PKG_GROUP=readMavenPom().groupId
+                ARTIFACT_PKG_VERSION="${readMavenPom().version}"
+                ARTIFACT_PKG_NAME="${readMavenPom().artifactId}"
+                ARTIFACT_PKG_SUFFIX="${readMavenPom().packaging}"
+                ARTIFACT_PKG_GROUP="${readMavenPom().groupId}"
             }
             steps {
 				outputs 'Git CheckOut'
