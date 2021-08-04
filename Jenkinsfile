@@ -103,10 +103,6 @@ spec:
             steps {
 				outputs 'Sending Notification when started'
 				notify 'STARTED'
-                echo "LOG->INFO : ARTIFACT_PKG_VERSION is ${env.ARTIFACT_PKG_VERSION}"
-                echo "LOG->INFO : ARTIFACT_PKG_NAME is ${env.ARTIFACT_PKG_NAME}"
-                echo "LOG->INFO : ARTIFACT_PKG_SUFFIX is ${env.ARTIFACT_PKG_SUFFIX}"
-                echo "LOG->INFO : ARTIFACT_PKG_GROUP is ${env.ARTIFACT_PKG_GROUP}"
             }
         }
 
@@ -124,8 +120,8 @@ spec:
                             -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
                             -Dsonar.host.url=${SONAR_SERVER_URL} \
                             -Dsonar.login=${SONAR_SCANNER_HASH} \
-                            -gs ${MAVEN_GLOBAL_SETTINGS}
-                       mvn clean test -f pom.xml -gs $MAVEN_GLOBAL_SETTINGS
+                            --batch-mode -gs ${MAVEN_GLOBAL_SETTINGS}
+                       mvn clean test -f pom.xml --batch-mode -gs $MAVEN_GLOBAL_SETTINGS
                     """
                 }
             }
@@ -142,7 +138,7 @@ spec:
                                  -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
                                  -Dsonar.host.url=${SONAR_SERVER_URL} \
                                  -Dsonar.login=${SONAR_SCANNER_HASH} \
-                                 -gs ${MAVEN_GLOBAL_SETTINGS}
+                                 --batch-mode -gs ${MAVEN_GLOBAL_SETTINGS}
                            """
                     }
                }
@@ -168,7 +164,7 @@ spec:
                 // maven package
                 configFileProvider([configFile(fileId: "${CONFIG_FILE_UUID}", variable: 'MAVEN_GLOBAL_SETTINGS')]) {
                 	sh """
-                       mvn package -DskipTests=true -f pom.xml -gs $MAVEN_GLOBAL_SETTINGS
+                       mvn package -DskipTests=true -f pom.xml --batch-mode -gs $MAVEN_GLOBAL_SETTINGS
                     """
                 }
 			}
