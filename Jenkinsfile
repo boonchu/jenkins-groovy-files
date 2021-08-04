@@ -41,11 +41,6 @@ pipeline {
         // Jenkins credential id to authenticate to Nexus OSS
         NEXUS_CREDENTIAL_ID = "nexus"
 
-        // Should be in discovery of build process
-        def ARTIFACT_PKG_VERSION = ''
-        def ARTIFACT_PKG_NAME  = ''
-        def ARTIFACT_PKG_SUFFIX  = ''
-        def ARTIFACT_PKG_GROUP  = ''
     }
     // * end of envs *
 
@@ -80,13 +75,22 @@ spec:
 
     // stages
     stages {
-        stage('Git CheckOut') {
+        stage('Git CheckOut and Discovery') {
+            environment {
+                ARTIFACT_PKG_VERSION=readMavenPom().version
+                ARTIFACT_PKG_NAME=readMavenPom().artifactId
+                ARTIFACT_PKG_SUFFIX=readMavenPom().packaging
+                ARTIFACT_PKG_GROUP=readMavenPom().groupId
+            }
             steps {
 				outputs 'Git CheckOut'
 				git branch: "${params.GIT_BRANCH_NAME}", url: "${params.GIT_URL}"
 				script {
 					// artifact info discovery
 					read_artifact_info()
+                    // https://maven.apache.org/pom.html
+                    // https://stackoverflow.com/questions/53541489/updating-environment-global-variable-in-jenkins-pipeline-from-the-stage-level/53541813
+                    // video - https://www.youtube.com/watch?v=KwQDxwZRZiE
                     echo "LOG->INFO : ARTIFACT_PKG_VERSION is ${env.ARTIFACT_PKG_VERSION}"
                     echo "LOG->INFO : ARTIFACT_PKG_NAME is ${env.ARTIFACT_PKG_NAME}"
                     echo "LOG->INFO : ARTIFACT_PKG_SUFFIX is ${env.ARTIFACT_PKG_SUFFIX}"
